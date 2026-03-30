@@ -25,7 +25,7 @@ cornhole | Cornhole Board Set | seasonal | $6 | $120
 HOW KOPP WORKS:
 - Browse 500+ products and pick what you need
 - Choose rental period: 1 day, 3 days, 1 week, or 2 weeks
-- Delivered within 24-48 hours, cleaned and ready
+- Delivered within 24–48 hours, cleaned and ready
 - Free doorstep pickup when the rental period ends
 - Delivery is free on orders $50+, otherwise $4.99
 - Available in Manhattan, NY
@@ -44,9 +44,32 @@ IMPORTANT: You must respond ONLY in this exact JSON format — no other text:
 Rules for the JSON fields:
 - "text": Required. Keep it warm, helpful, and conversational. Max 4 sentences.
 - "products": Optional. Include only when recommending specific items. Max 4 product IDs. IDs must exactly match the catalog above.
-- "suggestions": Optional. 2-3 short follow-up questions the user might want to ask next.
+- "suggestions": Optional. 2–3 short follow-up questions the user might want to ask next.
 - Never include markdown headers or bullet points inside "text" — write in plain sentences.
 - Use light emoji in "text" (1-2 max) to keep it friendly.`;
+
+const PRODUCT_MAP = {
+  'ps5':              { id: 'ps5',              e: '🎮', name: 'PlayStation 5',          cat: 'gaming',        price: 6,  rating: 4.9 },
+  'vr':               { id: 'vr',               e: '🥽', name: 'Meta Quest 3',            cat: 'gaming',        price: 10, rating: 4.8 },
+  'projector':        { id: 'projector',        e: '📽️', name: '4K Projector',            cat: 'entertainment', price: 15, rating: 4.7 },
+  'airfryer':         { id: 'airfryer',         e: '🍳', name: 'Air Fryer XL',            cat: 'kitchen',       price: 3,  rating: 4.9 },
+  'scooter':          { id: 'scooter',          e: '🛴', name: 'Electric Scooter',        cat: 'mobility',      price: 12, rating: 4.6 },
+  'speakers':         { id: 'speakers',         e: '🔊', name: 'Sonos Era 300 Set',       cat: 'entertainment', price: 8,  rating: 4.8 },
+  'peloton':          { id: 'peloton',          e: '🚴', name: 'Peloton Bike',            cat: 'fitness',       price: 10, rating: 4.7 },
+  'camping':          { id: 'camping',          e: '⛺', name: 'Camping Bundle',          cat: 'seasonal',      price: 20, rating: 4.8 },
+  'instantpot':       { id: 'instantpot',       e: '🍲', name: 'Instant Pot',             cat: 'kitchen',       price: 4,  rating: 4.8 },
+  'espresso':         { id: 'espresso',         e: '☕', name: 'Breville Barista Pro',    cat: 'kitchen',       price: 6,  rating: 4.9 },
+  'weights':          { id: 'weights',          e: '🏋️', name: 'Adjustable Dumbbells',    cat: 'fitness',       price: 5,  rating: 4.6 },
+  'yoga':             { id: 'yoga',             e: '🧘', name: 'Yoga & Pilates Kit',      cat: 'fitness',       price: 3,  rating: 4.7 },
+  'bike':             { id: 'bike',             e: '🚲', name: 'City Bicycle',            cat: 'mobility',      price: 8,  rating: 4.5 },
+  'popcorn':          { id: 'popcorn',          e: '🍿', name: 'Cinema Popcorn Machine',  cat: 'entertainment', price: 4,  rating: 4.9 },
+  'spikeball':        { id: 'spikeball',        e: '🎾', name: 'Spikeball Set',           cat: 'seasonal',      price: 4,  rating: 4.8 },
+  'gaming-chair':     { id: 'gaming-chair',     e: '🪑', name: 'Gaming Chair Pro',        cat: 'gaming',        price: 5,  rating: 4.6 },
+  'dj-mixer':         { id: 'dj-mixer',         e: '🎛️', name: 'Pioneer DJ Mixer',        cat: 'entertainment', price: 18, rating: 4.9 },
+  'wok':              { id: 'wok',              e: '🥢', name: 'Carbon Steel Wok Set',    cat: 'kitchen',       price: 2,  rating: 4.7 },
+  'resistance-bands': { id: 'resistance-bands', e: '🏃', name: 'Resistance Band Set',     cat: 'fitness',       price: 2,  rating: 4.6 },
+  'cornhole':         { id: 'cornhole',         e: '🪅', name: 'Cornhole Board Set',      cat: 'seasonal',      price: 6,  rating: 4.8 },
+};
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -91,6 +114,12 @@ export default async function handler(req, res) {
     if (jsonMatch) {
       try {
         const parsed = JSON.parse(jsonMatch[0]);
+        // Expand product ID strings to full product objects
+        if (Array.isArray(parsed.products)) {
+          parsed.products = parsed.products
+            .map(p => typeof p === 'string' ? (PRODUCT_MAP[p] || null) : p)
+            .filter(Boolean);
+        }
         return res.status(200).json(parsed);
       } catch (_) {
         // fall through
